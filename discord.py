@@ -13,7 +13,7 @@ from datetime import timedelta, datetime
 """
 module.DiscordScraper: Used to access the Discord Scraper class functions.
 """
-from module import DiscordScraper
+from .module import DiscordScraper
 
 """
 os._exit: Used to exit the script.
@@ -23,7 +23,7 @@ from os import _exit as exit
 """
 module.DiscordScraper.loads: Used to access the json.loads function documented in the DiscordScraper class file.
 """
-from module.DiscordScraper import loads
+from .module.DiscordScraper import loads
 
 def getLastMessageGuild(scraper, guild, channel):
     """
@@ -34,7 +34,7 @@ def getLastMessageGuild(scraper, guild, channel):
     """
 
     # Generate a valid URL to the documented API function for retrieving channel messages (we don't care about the 100 message limit this time).
-    lastmessage = 'https://discord.com/api/{0}/channels/{1}/messages?limit=1'.format(scraper.apiversion, channel)
+    lastmessage = 'https://discord.com/api/{0}/channels/{1}/messages?limit=10'.format(scraper.apiversion, channel)
 
     # Update the HTTP request headers to set the referer to the current guild channel URL.
     scraper.headers.update({'Referer': 'https://discord.com/channels/{0}/{1}'.format(guild, channel)})
@@ -53,8 +53,10 @@ def getLastMessageGuild(scraper, guild, channel):
         # Retrieve the snowflake of the post and convert it into a timestamp.
         timestamp = DiscordScraper.snowflakeToTimestamp(int(data[0]['id']))
 
+        print(data[0])
+
         # Return the datetime object from the given timestamp above.
-        return datetime.fromtimestamp(timestamp)
+        return datetime.fromisoformat(data[0]['timestamp']), data[0]['embeds']
 
     except Exception as ex:
         print(ex)
@@ -201,10 +203,10 @@ if __name__ == '__main__':
         for channel in channels:
 
             # Retrieve the datetime object for the most recent post in the channel.
-            lastdate = getLastMessageGuild(discordscraper, guild, channel)
+            lastdate, m = getLastMessageGuild(discordscraper, guild, channel)
 
             # Start the scraper for the current channel.
-            start(discordscraper, guild, channel, lastdate)
+            #start(discordscraper, guild, channel, lastdate)
     
     # Iterate through the direct messages to scrape.
     for alias, channel in discordscraper.directs.items():
