@@ -56,7 +56,7 @@ class DiscordRequest(object):
         # Create and set the class variable to store our headers.
         self.headers = headers
     
-    def sendRequest(self, url):
+    def sendRequest(self, url, method="GET", body=None):
         """
         Send a request to the target URL and return the response data.
         :param url: The URL to the target that we're wanting to grab data from.
@@ -75,15 +75,10 @@ class DiscordRequest(object):
         connection = HTTPSConnection(urlparts[2], 443)
 
         # Request the data from the connection.
-        connection.request('GET', urlpath, headers=self.headers)
+        connection.request(method, urlpath, headers=self.headers, body=body)
 
         # Retrieve the response from the request.
         response = connection.getresponse()
-
-        # TODO: Remove this before releasing
-        for header in response.getheaders():
-            if header[0] == 'Retry-After':
-                print(header)
 
         # Return the response if the connection was successful.
         if 199 < response.status < 300:
@@ -100,7 +95,7 @@ class DiscordRequest(object):
 
             # If the domain is a part of Discord then re-run this function.
             if domain in ['discordapp.com', 'discord.com']:
-                self.sendRequest(url)
+                self.sendRequest(url, method)
             
             # Throw a warning message to acknowledge an untrusted redirect.
             warn('Ignored unsafe redirect to {0}.'.format(url))

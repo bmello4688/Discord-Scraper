@@ -40,7 +40,7 @@ from signal import SIGINT, signal
 json.loads: Used to convert a serialized string into a dictionary object.
 json.dumps: Used to convert a dictionary object into a serialized string.
 """
-from json import loads, dump
+from json import loads, dump, dumps
 
 """
 random.choice: Used to simplify the process of "randomly" choosing a value from an array.
@@ -199,6 +199,36 @@ class DiscordScraper(object):
             videos = config.query['videos'],
             nsfw   = config.query['nsfw'  ]
         )
+
+    def login(self, email, password):
+
+        # Generate a valid URL to the documented API function for retrieving channel messages (we don't care about the 100 message limit this time).
+        url = f'https://discord.com/api/{self.apiversion}/auth/login'
+
+        # Update the HTTP request headers to set the referer to the current guild channel URL.
+        headers = self.headers.copy()
+        del headers['Authorization']
+        headers.update({'Referer': 'https://discord.com/login'})
+
+        try:
+            body_dict = {"login":email,"password":password,"undelete":False,"captcha_key":None,"login_source":None,"gift_code_sku_id":None}
+
+            body = dumps(body_dict)
+
+            # Execute the network query to retrieve the JSON data.
+            response = DiscordScraper.requestData("POST", url, headers, body)
+
+            # If we returned nothing then return nothing.
+            if response is None:
+                return None
+            
+            # Read the response data and convert it into a dictionary object.
+            data = loads(response.read())
+
+            return data['token']
+
+        except Exception as ex:
+            print(ex)
     
     def grabGuildName(self, id, dm=None):
         """
@@ -624,7 +654,7 @@ class DiscordScraper(object):
         return '&'.join(parameters)
 
     @staticmethod
-    def requestData(url, headers=None):
+    def requestData(method, url, headers=None, body=None):
         """
         Make a simplified alias to the Discord Requests sendRequest class function.
         :param url: The URL that we want to grab data from.
@@ -642,4 +672,4 @@ class DiscordScraper(object):
         request.setHeaders(headers)
 
         # Return the response.
-        return request.sendRequest(url)
+        return request.sendRequest(url, method=method, body=body)

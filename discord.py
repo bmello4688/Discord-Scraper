@@ -41,7 +41,7 @@ def getLastMessageGuild(scraper, guild, channel):
 
     try:
         # Execute the network query to retrieve the JSON data.
-        response = DiscordScraper.requestData(lastmessage, scraper.headers)
+        response = DiscordScraper.requestData("GET", lastmessage, scraper.headers)
 
         # If we returned nothing then return nothing.
         if response is None:
@@ -53,7 +53,7 @@ def getLastMessageGuild(scraper, guild, channel):
         # Retrieve the snowflake of the post and convert it into a timestamp.
         timestamp = DiscordScraper.snowflakeToTimestamp(int(data[0]['id']))
 
-        print(data[0])
+        #print(data[0])
 
         # Return the datetime object from the given timestamp above.
         return datetime.fromisoformat(data[0]['timestamp']), data[0]['embeds']
@@ -103,7 +103,7 @@ def startGuild(scraper, guild, channel, day=None):
         scraper.createFolders()
 
         # Grab the API response for the search query URL.
-        response = DiscordScraper.requestData(search, scraper.headers)
+        response = DiscordScraper.requestData("GET", search, scraper.headers)
 
         # If we returned nothing then continue on to the previous day.
         if response is None:
@@ -134,7 +134,7 @@ def startGuild(scraper, guild, channel, day=None):
                 try:
 
                     # Grab the API response for the search query URL.
-                    response = DiscordScraper.requestData(search, scraper.headers)
+                    response = DiscordScraper.requestData("GET", search, scraper.headers)
                     
                     # Read the response data.
                     data2 = loads(response.read().decode('iso-8859-1'))
@@ -213,3 +213,4 @@ if __name__ == '__main__':
 
         # Start the scraper for the current direct message.
         startDM(discordscraper, alias, channel)
+
